@@ -1,5 +1,5 @@
 import {Tunstall} from './tunstall'
-console.log(Tunstall);
+
 /*
 Corto
 Copyright (c) 2017-2020, Visual Computing Lab, ISTI - CNR
@@ -386,7 +386,6 @@ decode: function(stream) {
 },
 
 decodeGroups: function(stream) {
-	console.log('-=======decodehtooups', stream);
 	var t = this;
 	var n = stream.readInt();
 	t.groups = new Array(n);

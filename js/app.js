@@ -78,7 +78,6 @@ void main()  {
 loader.load(model, function(mesh) {
 	decode_times.push(loader.decode_time);
     blob = loader.blob;
-    console.log(blob,'blooob');
 
 	
 
@@ -95,7 +94,7 @@ loader.load(model, function(mesh) {
 	//mesh.scale.divideScalar(mesh.geometry.boundingBox.getSize().length());
 	scene.add(mesh); 
 
-	console.log(mesh.geometry,'crt');
+	console.log('crt',mesh.geometry);
 	
 	mesh.material = material
 
@@ -112,10 +111,9 @@ loader1.load(model1,(md)=>{
 	mesh.material = material;
 	// mesh.material = new THREE.MeshBasicMaterial({color:'red'});
 	scene.add(mesh)
-	console.log(mesh);
 	mesh.position.x = -6.3;
 	mesh.position.y = -1.3;
-	console.log(mesh.geometry,'obj');
+	console.log('obj',mesh.geometry);
 })
 
 

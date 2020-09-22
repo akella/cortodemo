@@ -125,7 +125,6 @@ decodePointCloud: function() {
 },
 
 decodeMesh: function() {
-	console.log('decodeMesh++');
 	var t = this;
 	t.index = new IndexAttr(t.nvert, t.nface);
 	t.index.decodeGroups(t.stream);
