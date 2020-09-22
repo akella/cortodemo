@@ -3,15 +3,14 @@ import './CORTOLoader';
 import CortoDecoderEm from './corto.em'
 import CortoDecoder from './cortodecoder'
 import 'regenerator-runtime/runtime'
-import model from '../models/buddha.crt';
-import model1 from '../models/cat.obj';
-console.log(model,'model');
+import model from '../models/plane.crt';
+import model1 from '../models/plane.obj';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
 
-console.log(CortoDecoder,'CortoDecoder');
 var camera = new THREE.PerspectiveCamera( 30, window.innerWidth / window.innerHeight, 0.1, 100 );
-camera.position.z = 4;
+camera.position.z = 14;
+camera.position.y = 14;
 
 var renderer = new THREE.WebGLRenderer( { antialias: false } );
 
@@ -81,7 +80,7 @@ loader.load(model, function(mesh) {
     blob = loader.blob;
     console.log(blob,'blooob');
 
-	mesh.addEventListener("change", render);
+	
 
 	// mesh.geometry.computeBoundingBox();
 	// if(!mesh.geometry.attributes.normal) {
@@ -96,6 +95,7 @@ loader.load(model, function(mesh) {
 	//mesh.scale.divideScalar(mesh.geometry.boundingBox.getSize().length());
 	scene.add(mesh); 
 
+	console.log(mesh.geometry,'crt');
 	
 	mesh.material = material
 
@@ -106,7 +106,6 @@ loader.load(model, function(mesh) {
 
 
 loader1.load(model1,(md)=>{
-	console.log(md,'moooood');
 	let mesh = md.children[0]
 	mesh.geometry.center();
 	mesh.scale.set(0.015,0.015,0.015)
@@ -114,7 +113,9 @@ loader1.load(model1,(md)=>{
 	// mesh.material = new THREE.MeshBasicMaterial({color:'red'});
 	scene.add(mesh)
 	console.log(mesh);
-	mesh.position.x = -0.3;
+	mesh.position.x = -6.3;
+	mesh.position.y = -1.3;
+	console.log(mesh.geometry,'obj');
 })
 
 
@@ -136,6 +137,7 @@ function onWindowResize() {
 
 function animate() {
 	requestAnimationFrame( animate );
+	render()
 	controls.update();
 }
 
@@ -150,19 +152,19 @@ function profile() {
     var now = performance.now();
     // console.log(CortoDecoder,'prof');
     var decoder = new CortoDecoder(blob,null,null);
-    console.log(blob,'blablabla');
+    // console.log(blob,'blablabla');
     // console.log(decoder,'prof');
 	var model = decoder.decode();
 	var ms = performance.now() - now;
 	decode_times.push(ms);
-	console.log((model.nvert/1024.0).toFixed(1) + "KV", ms.toFixed(1) + "ms", ((model.nvert/1000)/ms).toFixed(2) + "MV/s");
-	console.log("js:", ms);
+	// console.log((model.nvert/1024.0).toFixed(1) + "KV", ms.toFixed(1) + "ms", ((model.nvert/1000)/ms).toFixed(2) + "MV/s");
+	// console.log("js:", ms);
 
 	now = performance.now();
 	var geometry = CortoDecoderEm.decode(blob);
 	ms = performance.now() - now;
 	em_times.push(ms);
-	console.log("em:", ms);
+	// console.log("em:", ms);
 
 	var nvert = document.getElementById("nvert");
 	nvert.innerHTML= model.nvert;
@@ -201,9 +203,9 @@ animate();
 async function sync() {
 	await CortoDecoder.ready;
 	em_ready = true;
-	console.log('em ready')
+	// console.log('em ready')
     // profile();
-    console.log(CortoDecoder,'ready');
+    // console.log(CortoDecoder,'ready');
 }
 
 sync();
