@@ -3,14 +3,16 @@ import './CORTOLoader';
 import CortoDecoderEm from './corto.em'
 import CortoDecoder from './cortodecoder'
 import 'regenerator-runtime/runtime'
-import model from '../models/plane.crt';
-import model1 from '../models/plane.obj';
+import model from '../models/mesh.00001.crt';
+import model1 from '../models/mesh.00001.obj';
+import texture from '../models/tex.00001.png';
+import basistexture from '../models/tex.00001.basis';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
-
+import { BasisTextureLoader } from 'three/examples/jsm/loaders/BasisTextureLoader.js';
 var camera = new THREE.PerspectiveCamera( 30, window.innerWidth / window.innerHeight, 0.1, 100 );
-camera.position.z = 14;
-camera.position.y = 14;
+camera.position.z = 2;
+camera.position.y = 2;
 
 var renderer = new THREE.WebGLRenderer( { antialias: false } );
 
@@ -73,28 +75,51 @@ varying vec2 vUv;
 void main()  {
 	gl_FragColor = vec4(vUv,0.0,1.);
 }`
-});;
+});
 
+material = new THREE.MeshBasicMaterial({
+	map: new THREE.TextureLoader().load(texture)
+})
+
+var basisLoader = new BasisTextureLoader();
+basisLoader.setTranscoderPath( 'basis/' );
+basisLoader.detectSupport( renderer );
+
+basisLoader.load( basistexture, function ( tt ) {
+	// texture.magFilter = THREE.NearestFilter;
+	// texture.minFilter = THREE.NearestFilter;
+	// texture.encoding = THREE.sRGBEncoding;
+	tt.wrapS = THREE.RepeatWrapping;
+	tt.wrapT = THREE.RepeatWrapping;
+	tt.repeat.y = -1;
+	tt.anisotropy = 16;
+	// tt.generateMipmaps = true;
+	console.log(tt);
+	material.map = tt;
+	material.needsUpdate = true;
+});
+
+let debug = new THREE.Mesh(
+	new THREE.PlaneBufferGeometry(1,1),
+	material
+)
+scene.add(debug)
+
+
+
+// crt file
 loader.load(model, function(mesh) {
 	decode_times.push(loader.decode_time);
     blob = loader.blob;
 
 	
 
-	// mesh.geometry.computeBoundingBox();
-	// if(!mesh.geometry.attributes.normal) {
-	// 	if(!mesh.geometry.attributes.uv) {
-	// 		mesh.geometry.computeVertexNormals();
-	// 	}
-	// 	else ambient.intensity = 1.0;
-	// }
 
-	mesh.scale.set(0.015,0.015,0.015)
+
+	// mesh.scale.set(0.015,0.015,0.015)
 	//mesh.geometry.center();
 	//mesh.scale.divideScalar(mesh.geometry.boundingBox.getSize().length());
 	scene.add(mesh); 
-
-	console.log('crt',mesh.geometry);
 	
 	mesh.material = material
 
@@ -103,11 +128,11 @@ loader.load(model, function(mesh) {
 	// setTimeout(profile, 1000);
 } );
 
-
+// obj file
 loader1.load(model1,(md)=>{
 	let mesh = md.children[0]
 	mesh.geometry.center();
-	mesh.scale.set(0.015,0.015,0.015)
+	// mesh.scale.set(0.015,0.015,0.015)
 	mesh.material = material;
 	// mesh.material = new THREE.MeshBasicMaterial({color:'red'});
 	scene.add(mesh)
