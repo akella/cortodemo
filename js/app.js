@@ -3,19 +3,36 @@ import './CORTOLoader';
 import CortoDecoderEm from './corto.em'
 import CortoDecoder from './cortodecoder'
 import 'regenerator-runtime/runtime'
-import model from '../models/mesh.00001.crt';
-import model1 from '../models/mesh.00001.obj';
-import texture from '../models/tex.00001.png';
-import basistexture from '../models/tex.00001.basis';
+import model from '../models/export_00001.crt';
+import model1 from '../models/export_00001.obj';
+import modelGLB from '../models/export_00001.glb';
+import texture from '../models/export_00001.jpg';
+import textureDXT from '../models/flip1.ktx';
+import basistextureBLEED from '../models/zach.00001_bleed.basis';
+import basistextureNOTBLEED from '../models/export_00001.basis';
+
+
+
+
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { OBJLoader } from 'three/examples/jsm/loaders/OBJLoader.js';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { KTXLoader } from 'three/examples/jsm/loaders/KTXLoader.js';
 import { BasisTextureLoader } from 'three/examples/jsm/loaders/BasisTextureLoader.js';
-var camera = new THREE.PerspectiveCamera( 30, window.innerWidth / window.innerHeight, 0.1, 100 );
+var camera = new THREE.PerspectiveCamera( 30, window.innerWidth / window.innerHeight, 0.1, 1000 );
 camera.position.z = 2;
 camera.position.y = 2;
 
 var renderer = new THREE.WebGLRenderer( { antialias: false } );
 
+var formats = {
+			astc: renderer.extensions.has( 'WEBGL_compressed_texture_astc' ),
+			etc1: renderer.extensions.has( 'WEBGL_compressed_texture_etc1' ),
+			s3tc: renderer.extensions.has( 'WEBGL_compressed_texture_s3tc' ),
+			pvrtc: renderer.extensions.has( 'WEBGL_compressed_texture_pvrtc' )
+		};
+
+console.log({formats});
 var controls = new OrbitControls( camera,renderer.domElement );
 
 controls.addEventListener( 'change', render );
@@ -52,14 +69,15 @@ function getURLParameter(name) {
 
 var loader = new THREE.CORTOLoader(); //can pass a material or a multimaterial if you know whats' in the model.
 var loader1 = new OBJLoader(); //can pass a material or a multimaterial if you know whats' in the model.
-
+var loaderKTX = new KTXLoader();
 var decode_times = [];
 var em_times = [];
 
 var blob = null;
 var em_ready = false;
 
-let material = new THREE.ShaderMaterial({
+let material2 = new THREE.ShaderMaterial({
+	side: THREE.DoubleSide,
 uniforms: {
 },
 // wireframe: true,
@@ -77,69 +95,107 @@ void main()  {
 }`
 });
 
-material = new THREE.MeshBasicMaterial({
-	map: new THREE.TextureLoader().load(texture)
-})
+// let material = new THREE.MeshBasicMaterial({
+// 	// map: new THREE.TextureLoader().load(texture)
+// })
+// let material1 = material.clone()
+
+let loaderGLTF = new GLTFLoader();
 
 var basisLoader = new BasisTextureLoader();
 basisLoader.setTranscoderPath( 'basis/' );
 basisLoader.detectSupport( renderer );
 
-basisLoader.load( basistexture, function ( tt ) {
-	// texture.magFilter = THREE.NearestFilter;
-	// texture.minFilter = THREE.NearestFilter;
-	// texture.encoding = THREE.sRGBEncoding;
-	tt.wrapS = THREE.RepeatWrapping;
-	tt.wrapT = THREE.RepeatWrapping;
-	tt.repeat.y = -1;
-	tt.anisotropy = 16;
-	// tt.generateMipmaps = true;
-	console.log(tt);
-	material.map = tt;
-	material.needsUpdate = true;
-});
-
-let debug = new THREE.Mesh(
-	new THREE.PlaneBufferGeometry(1,1),
-	material
-)
-scene.add(debug)
 
 
 
-// crt file
-loader.load(model, function(mesh) {
-	decode_times.push(loader.decode_time);
-    blob = loader.blob;
 
-	
+// let debug = new THREE.Mesh(
+// 	new THREE.PlaneBufferGeometry(1,1),
+// 	material
+// )
+// debug.position.x = 1
+// scene.add(debug)
+// let debug1 = new THREE.Mesh(
+// 	new THREE.PlaneBufferGeometry(1,1),
+// 	material1
+// )
+// scene.add(debug1)
+// debug1.position.x = -2
 
 
-
-	// mesh.scale.set(0.015,0.015,0.015)
-	//mesh.geometry.center();
-	//mesh.scale.divideScalar(mesh.geometry.boundingBox.getSize().length());
-	scene.add(mesh); 
-	
-	mesh.material = material
-
-	render();
-
-	// setTimeout(profile, 1000);
-} );
 
 // obj file
-loader1.load(model1,(md)=>{
+loader1.load(model1, function(md) {
 	let mesh = md.children[0]
 	mesh.geometry.center();
-	// mesh.scale.set(0.015,0.015,0.015)
-	mesh.material = material;
-	// mesh.material = new THREE.MeshBasicMaterial({color:'red'});
-	scene.add(mesh)
-	mesh.position.x = -6.3;
-	mesh.position.y = -1.3;
-	console.log('obj',mesh.geometry);
-})
+
+	mesh.scale.set(0.001,0.001,0.001)
+	scene.add(mesh); 
+
+	mesh.material = new THREE.MeshBasicMaterial();
+
+	basisLoader.load( basistextureBLEED, function ( tt ) {
+		tt.magFilter = THREE.NearestFilter;
+		tt.minFilter = THREE.NearestFilter;
+		// tt.encoding = THREE.sRGBEncoding;
+		tt.wrapS = THREE.RepeatWrapping;
+		tt.wrapT = THREE.RepeatWrapping;
+		tt.repeat.y = -1;
+		tt.anisotropy = 16;
+		// tt.generateMipmaps = true;
+		mesh.material.map = tt;
+		mesh.material.needsUpdate = true;
+	});
+	
+	render();
+
+} );
+
+loader1.load(model1, function(md) {
+	let mesh = md.children[0]
+	mesh.geometry.center();
+
+	mesh.scale.set(0.001,0.001,0.001)
+	scene.add(mesh); 
+	mesh.position.y = 0.05;
+	mesh.position.x = -0.3;
+
+	mesh.material = new THREE.MeshBasicMaterial();
+
+	basisLoader.load( basistextureNOTBLEED, function ( tt ) {
+		tt.magFilter = THREE.NearestFilter;
+		tt.minFilter = THREE.NearestFilter;
+		// tt.encoding = THREE.sRGBEncoding;
+		tt.wrapS = THREE.RepeatWrapping;
+		tt.wrapT = THREE.RepeatWrapping;
+		tt.repeat.y = -1;
+		tt.anisotropy = 16;
+		// tt.generateMipmaps = true;
+		mesh.material.map = tt;
+		mesh.material.needsUpdate = true;
+	});
+	
+	render();
+
+} );
+
+loader1.load(model1, function(md) {
+	let mesh = md.children[0]
+	mesh.geometry.center();
+
+	mesh.scale.set(0.001,0.001,0.001)
+	scene.add(mesh); 
+	mesh.position.x = -0.6;
+
+	mesh.material = new THREE.MeshBasicMaterial({
+		map:new THREE.TextureLoader().load(texture)
+	});
+
+	
+	render();
+
+} );
 
 
 window.addEventListener( 'resize', onWindowResize, false );
